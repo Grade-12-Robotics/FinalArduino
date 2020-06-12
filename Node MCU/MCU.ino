@@ -1,8 +1,12 @@
 #include <ESP8266WiFi.h>
+#include <WiFiClient.h>
 
 // Replace with your network credentials
 const char* ssid     = "WIFI SSID";
 const char* password = "WIFI PASSWORD";
+
+IPAddress staticIP(192, 168, 2, 65); //ESP static ip
+
 
 // Set web server port number to 80 or to what ever you want
 WiFiServer server(4342);
@@ -13,10 +17,12 @@ String header;
 // Auxiliar variables to store the current output state
 String output5State = "off";
 String output4State = "off";
+String output3State = "off";
 
 // Assign output variables to GPIO pins
 const int output5 = 5;
 const int output4 = 4;
+const int output16 = 16;
 
 // Current time
 unsigned long currentTime = millis();
@@ -30,9 +36,11 @@ void setup() {
   // Initialize the output variables as outputs
   pinMode(output5, OUTPUT);
   pinMode(output4, OUTPUT);
+  pinMode(output16, OUTPUT);
   // Set outputs to LOW
   digitalWrite(output5, LOW);
   digitalWrite(output4, LOW);
+  digitalWrite(output16, LOW);
 
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Connecting to ");
@@ -92,7 +100,16 @@ void loop(){
               Serial.println("GPIO 4 off");
               output4State = "off";
               digitalWrite(output4, LOW);
+            } else if (header.indexOf("GET /16/on") >= 0) {
+              Serial.println("GPIO 16 on");
+              output3State = "on";
+              digitalWrite(output16, HIGH);
+            } else if (header.indexOf("GET /16/off") >= 0) {
+              Serial.println("GPIO 16 off");
+              output3State = "off";
+              digitalWrite(output16, LOW);
             }
+            
             client.println();
             // Break out of the while loop
             break;
